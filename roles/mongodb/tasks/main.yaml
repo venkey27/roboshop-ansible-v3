@@ -1,0 +1,21 @@
+- name: copy mongodb repo file
+  copy:
+    src: mongo.repo  #src means mongo.repo file should be in the same location where this playbook is present # src means source file
+    dest: /etc/yum.repos.d/mongo.repo # dest means destination file. This is the location where the mongo.repo file will be copied to on the target machine.
+
+- name: install mongodb server
+  package:
+    name: mongodb-org #org means we want to install the latest version of mongodb. If we wanted to install a specific version, we could specify it like this: mongodb-org-4.4.6
+    state: present
+
+- name: allow remote connections
+  replace:
+    path: /etc/mongod.conf
+    regexp: '127.0.0.1'
+    replace: '0.0.0.0'
+  
+- name: start and enable mongodb service
+  service:
+    name: mongod
+    state: started
+    enabled: yes  

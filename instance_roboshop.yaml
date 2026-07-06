@@ -1,0 +1,86 @@
+- name: roboshop instances management
+  hosts: local
+  connection: local
+  vars:
+    instances: ["mongodb", "redis", "mysql", "rabbitmq", "frontend", "cart", "catalogue", "user", "payment", "shipping"] # list of all the instances we want to create or delete. We can add or remove instances from this list as needed.
+    image_id: ami-0220d79f3f480ecf5
+    domain_name: exptrack.shop
+    action: create # action variable to determine whether we want to create or delete the instances and route53 records. We can set it to "create" or "delete" when we run the playbook.
+  tasks:
+  - name: create ec2 instances
+    amazon.aws.ec2_instance:
+      instance_type: t3.micro
+      name: "roboshop-{{ item }}"
+      image_id: "{{ image_id }}"
+      security_groups:
+      - "roboshop-{{ item }}"
+      - "roboshop-common"   
+    loop: "{{ instances }}"
+    register: ec2_output # ec2_output variable will contain the details of the instances that were created, including their private IP addresses, public IP addresses, instance IDs, etc. We will use this information later to create route53 records and to delete the instances if needed.
+    when: action == "create"
+
+  # - name: display instance information
+  #   debug:
+  #     msg: "{{ ec2_output }}"
+
+  # - name: create route53 record
+  #   debug:
+  #     msg: "Instance Name: {{ item.item }} Private IP: {{ item.instances[0].private_ip_address }}"
+  #   loop: "{{ ec2_output.results }}"
+
+  - name: create route53 record 
+    amazon.aws.route53:
+      state: present                    #item contains all the instance details (the IP, the ID, the status, etc.).
+      zone: "{{ domain_name }}"         #item.item goes inside that data and grabs only the name field (like "mongodb" or "redis")
+      record: "{{ item.item }}.{{ domain_name }}" #item.item because we are looping through ec2_output.results and each item in that list has an attribute called item which contains the name of the instance
+      type: A
+      ttl: 1
+      value: "{{ item.instances[0].private_ip_address }}" 
+      overwrite: true
+    loop: "{{ ec2_output.results }}" # results is a list of all the instances that were created, and we are looping through that list to create route53 records for each instance.
+    when: action == "create"
+
+  - name: create route53 record for frontend
+    amazon.aws.route53:
+      state: present                    #item means: "The receipt I am holding right now."
+      zone: "{{ domain_name }}"         #item.item means: "Look inside the receipt I am holding, and find the original label text." (which will be "mongodb", "redis", etc.)
+      record: "{{ domain_name }}" #item.item because we are looping through ec2_output.results and each item in that list has an attribute called item which contains the name of the instance
+      type: A
+      ttl: 1
+      value: "{{ item.instances[0].public_ip_address }}" 
+      overwrite: true
+    loop: "{{ ec2_output.results }}" 
+    when: 
+    -  item.item == "frontend"
+    -  action == "create"
+
+  - name: delete route53 record    
+    amazon.aws.route53:
+      state: absent
+      zone: "{{ domain_name }}"
+      ttl: 1
+      type: A
+      record: "{{ item }}.{{ domain_name }}" #record is used to specify the name of the record we want to delete, in this case we are using the name of the instance which is in the instances list and appending the domain name to it.
+    loop: "{{ instances }}" # ec2_output.results is a list of all the instances that were created, and we are looping through that list to delete the route53 records for each instance.
+    when: action == "delete"
+
+  - name: delete route53 record  for frontend  
+    amazon.aws.route53:
+      state: absent
+      zone: "{{ domain_name }}"
+      ttl: 1
+      type: A
+      record: "{{ domain_name }}" #record is used to specify the name of the record we want to delete, in this case we are using the name of the instance which is in the instances list and appending the domain name to it.
+    loop: "{{ instances }}"
+    when: 
+      - action == "delete"
+      - item == "frontend"
+
+
+  - name: delete ec2 instances
+    amazon.aws.ec2_instance:
+      state: absent
+      name: "roboshop-{{ item }}"
+      wait: false
+    loop: "{{ instances }}"
+    when: action == "delete"

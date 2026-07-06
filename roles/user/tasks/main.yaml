@@ -1,0 +1,20 @@
+- name: application setup
+  import_role:
+    name: common
+    tasks_from: app-setup
+
+- name: nodejs setup
+  import_role: 
+    name: common
+    tasks_from: nodejs
+
+- name: systemd setup
+  import_role: 
+    name: common
+    tasks_from: systemd-setup
+
+- name: enable and restart
+  service:
+    name: user
+    state: restarted 
+    enabled: yes

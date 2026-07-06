@@ -1,0 +1,21 @@
+- name : app setup
+  import_role:
+    name: common
+    tasks_from: app-setup
+
+- name: python setup
+  import_role:
+    name: common
+    tasks_from: python
+
+
+- name: systemd setup
+  import_role: 
+    name: common
+    tasks_from: systemd-setup
+
+- name: enable and start payment
+  service:
+    name: payment
+    state: restarted
+    enabled: yes

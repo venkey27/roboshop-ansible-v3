@@ -1,0 +1,8 @@
+- name: demo role
+  debug:
+    msg: " hi i am from demo role tasks"
+
+  # this should load another role called common
+- name: import demo role
+  import_role:
+    name: common
