@@ -1,5 +1,5 @@
-# ansible-playbook roboshop.yaml -e "component=mongodb"
-
+# ansible-playbook roboshop.yaml -e "component=mongodb"   
+                          # if we use TERRAFORM then ROBOSHOP.YAML will RUN FIRST 
 - name: configure "{{ component }}" server
   hosts: "{{ component }}"
   connection: local
