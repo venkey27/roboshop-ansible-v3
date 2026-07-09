@@ -1,6 +1,6 @@
 MONGODB_HOST: mongodb-{{ env }}.exptrack.shop
 REDIS_HOST: redis-{{ env }}.exptrack.shop
-CATALOGUE_HOST: catalogue-{{ env }}.exptrack.shop
+CATALOGUE_HOST: catalogue.backend-alb-{{ env }}.exptrack.shop   # we are using backend-alb her, LOAD BALANCER will send traffic to CATALOGUE now
 MYSQL_HOST: mysql-{{ env }}.exptrack.shop
 CART_HOST: cart-{{ env }}.exptrack.shop
 USER_HOST: user-{{ env }}.exptrack.shop
