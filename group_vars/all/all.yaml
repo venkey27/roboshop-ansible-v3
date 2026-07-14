@@ -3,7 +3,7 @@ REDIS_HOST: redis-{{ env }}.exptrack.shop
 RABBITMQ_HOST: rabbitmq-{{ env }}.exptrack.shop
 MYSQL_HOST: mysql-{{ env }}.exptrack.shop
 CATALOGUE_HOST: catalogue.backend-alb-{{ env }}.exptrack.shop   # we are using backend-alb her, LOAD BALANCER will send traffic to CATALOGUE now
-CART_HOST: cart-backend-alb-{{ env }}.exptrack.shop                  # we cant accessnt the backend instances directly so we using backend-alb
-USER_HOST: user-backend-alb-{{ env }}.exptrack.shop
-SHIPPING_HOST: shipping-backend-alb-{{ env }}.exptrack.shop
-PAYMENT_HOST: payment-backend-alb-{{ env }}.exptrack.shop
+CART_HOST: cart.backend-alb-{{ env }}.exptrack.shop                  # we cant accessnt the backend instances directly so we using backend-alb
+USER_HOST: user.backend-alb-{{ env }}.exptrack.shop
+SHIPPING_HOST: shipping.backend-alb-{{ env }}.exptrack.shop
+PAYMENT_HOST: payment.backend-alb-{{ env }}.exptrack.shop
